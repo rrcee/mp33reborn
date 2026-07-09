@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>mp33</title>
   
-  <!-- PWA Setup -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,73 +14,88 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Dynamic Theme Variables */
-      --theme-r: 20;
-      --theme-g: 20;
-      --theme-b: 20;
-      
+      --theme-r: 20; --theme-g: 20; --theme-b: 20;
       --glass: rgba(255, 255, 255, 0.08);
       --glass-strong: rgba(255, 255, 255, 0.14);
       --on-glass: rgba(255, 255, 255, 0.95);
       --shadow: rgba(0, 0, 0, 0.55);
       --art-radius: 22px;
-      
-      /* Dynamic Tint based on Album Art */
       --tint-0: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.6);
       --tint-1: rgba(0, 0, 0, 0.85);
     }
-    * { box-sizing: border-box; }
+    
+    /* Native App Feel */
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+    }
     html, body { height: 100%; margin: 0; padding: 0; }
     body {
       color: #fff;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-      background: #000;
-      overflow: hidden;
+      background: #000; overflow: hidden;
+      -webkit-touch-callout: none;
     }
     
-    /* Splash screen */
+    /* Cinematic Game Studio Splash */
     #splashScreen {
-      position: fixed; inset: 0; background: #000; display: flex; flex-direction: column;
+      position: fixed; inset: 0; background: #010101; display: flex; flex-direction: column;
       align-items: center; justify-content: center; z-index: 999;
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
     }
-    #splashScreen h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.05em; }
-    #splashScreen p { font-size: 1.1rem; opacity: 0.6; font-weight: 400; margin: 0; }
+    .splash-content { text-align: center; position: relative; z-index: 2; }
+    #splashScreen h1 { 
+      font-size: 3.5rem; font-weight: 700; margin: 0 0 0.5rem; text-transform: uppercase;
+      background: linear-gradient(90deg, #444, #fff, #444);
+      background-size: 200% auto; color: transparent; -webkit-background-clip: text;
+      animation: shine 2.5s linear infinite, cinematicScale 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #splashScreen p { 
+      font-size: 1rem; opacity: 0; font-weight: 600; margin: 0; letter-spacing: 0.2em; text-transform: uppercase;
+      animation: fadeUp 1s ease forwards 0.5s; color: rgba(255,255,255,0.5);
+    }
+    
+    @keyframes shine { to { background-position: 200% center; } }
+    @keyframes cinematicScale { 
+      0% { transform: scale(0.8); opacity: 0; letter-spacing: -0.1em; filter: blur(12px); } 
+      100% { transform: scale(1); opacity: 1; letter-spacing: 0.05em; filter: blur(0); } 
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
     
     .glass-orb {
       width: 140px; height: 140px; border-radius: 50%; position: absolute; top: 50%; left: 50%;
       background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
-      transform: translate(-50%, -50%); animation: pulse 2.5s ease-in-out infinite; pointer-events: none;
+      transform: translate(-50%, -50%); animation: pulse 2.5s ease-in-out infinite; pointer-events: none; z-index: 1;
     }
-    @keyframes pulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.4; }
-      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
-    }
+    @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.4; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; } }
     
-    /* Blurred background */
+    /* Background */
     .bg {
       position: fixed; inset: 0; background: #000 center/cover no-repeat; filter: blur(32px) brightness(0.6);
       transform: scale(1.08); transition: background-image 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: -2; animation: bg-pan 45s ease-in-out infinite;
     }
-    @keyframes bg-pan {
-      0%, 100% { background-position: center; transform: scale(1.08) rotate(0deg); }
-      50% { background-position: 48% 52%; transform: scale(1.12) rotate(1deg); }
-    }
-    
-    /* Dynamic Background Tint */
+    @keyframes bg-pan { 0%, 100% { background-position: center; transform: scale(1.08) rotate(0deg); } 50% { background-position: 48% 52%; transform: scale(1.12) rotate(1deg); } }
     .bg-tint {
       position: fixed; inset: 0; pointer-events: none; z-index: -1;
       background: linear-gradient(180deg, var(--tint-0), var(--tint-1));
       transition: opacity 0.1s ease-out, background 0.6s ease; opacity: 0.7; 
     }
     
-    /* Main Layout */
-    .wrap { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    /* Main Layout with 3D Transform Prep */
+    .wrap { 
+      height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px;
+      perspective: 1000px;
+    }
     .card {
       width: 100%; max-width: 410px; border-radius: 28px; background: var(--glass); display: flex; flex-direction: column; gap: 16px;
       backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
       box-shadow: 0 24px 60px var(--shadow), inset 0 1px 1px rgba(255,255,255,0.05); padding: 20px 20px 16px; 
+      transition: transform 0.15s ease-out; /* Smooths out sensor noise */
+      transform-style: preserve-3d;
     }
     
     /* Album Art */
@@ -142,7 +156,7 @@
     .transport-extras { display: flex; gap: 8px; }
     .icon-link {
       width: 38px; height: 38px; font-size: 16px; background: var(--glass-strong); border-radius: 12px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #fff;
+      display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #fff; user-select: none;
     }
     .icon-link:hover { background: rgba(255,255,255,0.2); }
 
@@ -156,7 +170,7 @@
     }
     .overlay.active .sheet { transform: translateY(0); }
     .sheet h3 { margin: 0 0 16px; font-size: 18px; font-weight: 700; }
-    .sheet-close-btn { background: var(--glass-strong); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .sheet-close-btn { background: var(--glass-strong); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
     .upnext-item { padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.04); margin-bottom: 8px; display: flex; gap: 12px; align-items: center; cursor: pointer; }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0.4; }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -167,7 +181,7 @@
     .toggle:checked:before { left: 19px; }
     
     .small { font-size: 13px; opacity: 0.7; line-height: 1.4; }
-    .action-row-btn { background: var(--glass-strong); padding: 12px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 600; font-size: 14px; }
+    .action-row-btn { background: var(--glass-strong); padding: 12px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 600; font-size: 14px; user-select: none; }
     .mode-btn { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-weight: 500; }
     .mode-btn.active { background: #fff; color: #000; font-weight: 600; }
     .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.2); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
@@ -178,15 +192,17 @@
 
   <div id="splashScreen">
     <div class="glass-orb"></div>
-    <h1>mp33</h1>
-    <p>by Rishi Rohith</p>
+    <div class="splash-content">
+      <h1>mp33</h1>
+      <p>by Rishi Rohith</p>
+    </div>
   </div>
 
   <div id="bg" class="bg"></div>
   <div id="bgTint" class="bg-tint"></div>
 
   <div class="wrap">
-    <div class="card">
+    <div class="card" id="mainCard">
       <div id="artContainer" class="art-container">
         <div class="art-content-wrapper">
           <img id="artImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Crect width='100%25' height='100%25' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='24'%3EUpload music to begin%3C/text%3E%3C/svg%3E" alt="Album art" crossorigin="anonymous">
@@ -202,7 +218,7 @@
       </div>
 
       <div id="fileUploads" class="uploads">
-        <label class="btn-upload">Folder<input id="folderInput" type="file" webkitdirectory directory multiple accept="audio/*"></label>
+        <label class="btn-upload">Folder<input id="folderInput" type="file" webkitdirectory directory multiple></label>
         <label class="btn-upload">File<input id="fileInput" type="file" multiple accept="audio/*"></label>
       </div>
 
@@ -240,13 +256,6 @@
             </div>
           </div>
           <div class="transport-extras">
-            <!-- PWA Install Button -->
-            <div id="installPwaBtn" class="icon-link hide" title="Install App">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-              </svg>
-            </div>
             <div id="openAIFeatures" class="icon-link" title="AI Features">✨</div>
             <div id="openSettings" class="icon-link" title="Settings">&#9881;</div>
           </div>
@@ -281,6 +290,13 @@
   <div id="settingsOv" class="overlay" role="dialog" aria-modal="true">
     <div class="sheet">
       <div class="row"><h3>Settings</h3><div id="closeSettings" class="sheet-close-btn">Close</div></div>
+      
+      <!-- Moved Install PWA Button here -->
+      <div class="row hide" style="margin:14px 0;" id="installAppRow">
+        <div><div>Install App</div><div class="small">Add mp33 to your homescreen.</div></div>
+        <button id="installPwaBtn" class="btn-upload" style="flex: 0 0 80px; background: #fff; color: #000;">Install</button>
+      </div>
+
       <div class="row" style="margin:14px 0;">
         <div><div>Player Mode</div><div class="small">Local files or YouTube.</div></div>
         <div style="display: flex; gap: 8px; width: 160px;">
@@ -321,12 +337,13 @@
     }
 
     let deferredPrompt;
+    const installAppRow = document.getElementById('installAppRow');
     const installPwaBtn = document.getElementById('installPwaBtn');
     
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installPwaBtn.classList.remove('hide');
+      installAppRow.classList.remove('hide'); // Shows inside Settings
     });
 
     installPwaBtn.addEventListener('click', async () => {
@@ -334,15 +351,35 @@
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       deferredPrompt = null;
-      installPwaBtn.classList.add('hide');
+      installAppRow.classList.add('hide');
     });
 
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
-      installPwaBtn.classList.add('hide');
+      installAppRow.classList.add('hide');
     });
 
-    // --- 2. Core Player Setup ---
+    // --- 2. 3D Sensor Hover (Gyroscope + Mouse fallback) ---
+    const card = document.getElementById('mainCard');
+    
+    // Mobile Gyroscope
+    window.addEventListener('deviceorientation', (e) => {
+        if (e.beta === null || e.gamma === null) return;
+        // Normalize degrees for a phone typically held at a 45 degree angle
+        let x = Math.max(-12, Math.min(12, (e.beta - 45) / 2)); 
+        let y = Math.max(-12, Math.min(12, e.gamma / 2.5));
+        card.style.transform = `rotateX(${-x}deg) rotateY(${y}deg)`;
+    });
+
+    // Desktop Mouse Tracking
+    window.addEventListener('mousemove', (e) => {
+        // Only run if deviceorientation didn't fire (typically desktop)
+        let x = (window.innerWidth / 2 - e.pageX) / 30;
+        let y = (window.innerHeight / 2 - e.pageY) / 30;
+        card.style.transform = `rotateX(${y}deg) rotateY(${-x}deg)`;
+    });
+
+    // --- 3. Core Player Setup ---
     const audio = document.getElementById('audio');
     const artImg = document.getElementById('artImg');
     const bg = document.getElementById('bg');
@@ -356,7 +393,6 @@
     let currentMode = 'local';
     let youtubePlayerInstance;
     
-    // --- 3. Dynamic Theming Engine ---
     function getAverageColor(imgElement) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -389,7 +425,6 @@
         tempImg.src = src;
     }
 
-    // --- 4. Audio Visualizer ---
     let audioContext, analyser, source, dataArray, visualizerAnimating = false;
     const setTint = document.getElementById('setTint');
     
@@ -436,7 +471,6 @@
         bgTint.style.opacity = setTint.checked ? 0.7 : 0;
     }
 
-    // --- 5. Media Loading ---
     const fmt = s => isNaN(s)?'0:00':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
     
     function updateProgressUI(currentTime, duration) {
@@ -465,7 +499,11 @@
     }
 
     async function addFiles(fileList){
-      const audios = [...fileList].filter(f => f.type.startsWith('audio/'));
+      // Fix for folder uploads: Check MIME type OR file extension for Chromium bug
+      const audios = [...fileList].filter(f => {
+         return f.type.startsWith('audio/') || !!f.name.match(/\.(mp3|wav|ogg|flac|m4a|aac)$/i);
+      });
+      
       for (const f of audios){
         const url = URL.createObjectURL(f);
         const tags = await extractTags(f);
@@ -516,7 +554,6 @@
     function next(){ if (current < playlist.length-1) load(current+1); else { pause(); if(currentMode === 'local') audio.currentTime = 0; } }
     function prev(){ if (current > 0) load(current-1); else load(0); }
 
-    // --- 6. Event Listeners ---
     document.getElementById('playPause').addEventListener('click', ()=>{
         if (currentMode === 'local') { 
             if(audioContext && audioContext.state === 'suspended') audioContext.resume();
@@ -544,22 +581,19 @@
     });
     audio.addEventListener('ended', () => { if (current < playlist.length-1) next(); else pause(); });
 
-    // UI Toggles
     document.getElementById('setRounded').onchange = (e)=> {
       document.documentElement.style.setProperty('--art-radius', e.target.checked ? '22px' : '0px');
     };
     
-    // Splash
     window.addEventListener('DOMContentLoaded', () => {
       const savedKey = localStorage.getItem('mp33_gemini_key');
       if(savedKey) document.getElementById('geminiApiKeyInput').value = savedKey;
       setTimeout(() => {
         const s = document.getElementById('splashScreen');
         s.style.opacity = '0'; s.style.visibility = 'hidden';
-      }, 700);
+      }, 1600); // Extended slightly to let the animation play out
     });
 
-    // Panels
     const panels = ['queueOv', 'settingsOv', 'aiFeaturesOv', 'artistInfoOv', 'songSummaryOv', 'lyricsFinderOv'];
     function openPanel(id) { document.getElementById(id).classList.add('active'); }
     function closePanel(id) { document.getElementById(id).classList.remove('active'); }
@@ -612,7 +646,7 @@
       });
     }
 
-    // --- 7. BYOK AI Engine ---
+    // --- 4. BYOK AI Engine ---
     document.getElementById('saveKeyBtn').onclick = () => {
       const keyVal = document.getElementById('geminiApiKeyInput').value.trim();
       localStorage.setItem('mp33_gemini_key', keyVal);
@@ -669,7 +703,7 @@
       } catch(err) { document.getElementById('lyricsContent').textContent = err.message; }
     };
 
-    // --- 8. YouTube API ---
+    // --- 5. YouTube API ---
     const YOUTUBE_API_KEY = "AIzaSyCRp1Gqj5yO2EHlUdlbTVipFWgFGAOM40Y";
     document.getElementById('ytLoadBtn').addEventListener('click', async () => {
         const url = document.getElementById('ytUrlInput').value.trim();
