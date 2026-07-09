@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mp33-v1-cache';
+const CACHE_NAME = 'mp33-v2-cache';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,7 +7,6 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js'
 ];
 
-// Install Event: Cache Core Assets
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -17,7 +16,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate Event: Cleanup old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -28,9 +26,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch Event: Network First, fallback to Cache
 self.addEventListener('fetch', event => {
-  // Ignore external API calls to prevent caching dynamic data or media blobs
   if (event.request.url.includes('googleapis.com') || event.request.url.includes('youtube.com') || event.request.url.startsWith('blob:')) {
     return;
   }
