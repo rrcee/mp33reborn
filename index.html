@@ -50,7 +50,7 @@
     /* THEATER MODE (9:16 Cinematic) */
     body.theater-active .wrap { padding: 0; align-items: flex-end; }
     body.theater-active .card { max-width: 100%; height: 100%; border-radius: 0; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; justify-content: flex-end; padding: 40px 24px; border: none; transform: none !important; }
-    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.4; } /* Expands art to background */
+    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.4; } 
     body.theater-active .title { text-align: center; margin-bottom: 20px; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
     body.theater-active .title h1 { font-size: 28px; }
     body.theater-active .title p { font-size: 16px; opacity: 0.8; }
@@ -214,7 +214,7 @@
     </div>
   </div>
 
-  <!-- Framework Overlays (Queue, Settings, AI abbreviated to standard HTML) -->
+  <!-- Framework Overlays -->
   <div id="queueOv" class="overlay"><div class="sheet"><div class="row"><h3>Up Next</h3><div id="closeQueue" class="sheet-close-btn">Close</div></div><div id="queueList"></div></div></div>
   
   <div id="settingsOv" class="overlay" role="dialog" aria-modal="true">
@@ -239,44 +239,167 @@
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // --- Setup & Config ---
+    // --- Splash Screen & API Key Init (Decoupled & DOM cleanup) ---
+    const savedKey = localStorage.getItem('mp33_gemini_key');
+    if (savedKey) document.getElementById('geminiApiKeyInput').value = savedKey;
+
+    setTimeout(() => {
+      const splash = document.getElementById('splashScreen');
+      if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(() => splash.remove(), 800); // Fully remove from DOM
+      }
+    }, 1600); 
+
+    // --- 1. PWA & Service Worker Logic ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+      });
+    }
+
+    let deferredPrompt;
+    const installAppRow = document.getElementById('installAppRow');
+    const installPwaBtn = document.getElementById('installPwaBtn');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installAppRow.classList.remove('hide'); 
+    });
+
+    installPwaBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installAppRow.classList.add('hide');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      installAppRow.classList.add('hide');
+    });
+
+    // --- 2. 3D Sensor Hover (Gyroscope + Mouse fallback) ---
+    const card = document.getElementById('mainCard');
+    
+    window.addEventListener('deviceorientation', (e) => {
+        if (e.beta === null || document.body.classList.contains('theater-active')) return;
+        let x = Math.max(-12, Math.min(12, (e.beta - 45) / 2)); 
+        let y = Math.max(-12, Math.min(12, e.gamma / 2.5));
+        card.style.transform = `rotateX(${-x}deg) rotateY(${y}deg)`;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if(document.body.classList.contains('theater-active')) return;
+        let x = (window.innerWidth / 2 - e.pageX) / 30;
+        let y = (window.innerHeight / 2 - e.pageY) / 30;
+        card.style.transform = `rotateX(${y}deg) rotateY(${-x}deg)`;
+    });
+
+    // --- 3. Core Player Setup ---
     const audio = document.getElementById('audio');
     const artImg = document.getElementById('artImg');
     const bg = document.getElementById('bg');
+    const bgTint = document.getElementById('bgTint');
     const titleEl = document.getElementById('trackTitle');
     const artistEl = document.getElementById('trackArtist');
+    const seek = document.getElementById('seek');
+    
     let playlist = [], current = -1, currentMode = 'local', youtubePlayerInstance;
     
-    // --- Phase 1: Web Audio EQ & Engine ---
-    let audioContext, analyser, source, filters = [];
+    function getAverageColor(imgElement) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 50; canvas.height = 50;
+        ctx.drawImage(imgElement, 0, 0, 50, 50);
+        const data = ctx.getImageData(0, 0, 50, 50).data;
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 16) { 
+            r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+        }
+        return { r: Math.floor(r/count), g: Math.floor(g/count), b: Math.floor(b/count) };
+    }
+
+    function updateBackground(src) {
+        bg.style.backgroundImage = `url('${src}')`;
+        const tempImg = new Image();
+        tempImg.crossOrigin = "Anonymous";
+        tempImg.onload = () => {
+            try {
+                const {r, g, b} = getAverageColor(tempImg);
+                document.documentElement.style.setProperty('--theme-r', r);
+                document.documentElement.style.setProperty('--theme-g', g);
+                document.documentElement.style.setProperty('--theme-b', b);
+            } catch(e) {
+                document.documentElement.style.setProperty('--theme-r', 20);
+                document.documentElement.style.setProperty('--theme-g', 20);
+                document.documentElement.style.setProperty('--theme-b', 20);
+            }
+        };
+        tempImg.src = src;
+    }
+
+    // --- 4. Web Audio EQ & Engine ---
+    let audioContext, analyser, source, filters = [], visualizerAnimating = false;
     const eqBands = [60, 230, 910, 3600, 14000];
+    const setTint = document.getElementById('setTint');
     
     function initWebAudio() {
-        if (audioContext) return;
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        source = audioContext.createMediaElementSource(audio);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
+        if (visualizerAnimating) return;
+        visualizerAnimating = true;
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            source = audioContext.createMediaElementSource(audio);
 
-        // Build 5-Band EQ Chain
-        let prevNode = source;
-        eqBands.forEach((freq, i) => {
-            let filter = audioContext.createBiquadFilter();
-            filter.type = (i === 0) ? 'lowshelf' : (i === 4) ? 'highshelf' : 'peaking';
-            filter.frequency.value = freq;
-            filter.gain.value = 0;
-            filters.push(filter);
-            prevNode.connect(filter);
-            prevNode = filter;
-            
-            // Link HTML sliders to Web Audio filters
-            document.getElementById(`eq${freq}`).addEventListener('input', (e) => {
-                filter.gain.value = e.target.value;
+            let prevNode = source;
+            eqBands.forEach((freq, i) => {
+                let filter = audioContext.createBiquadFilter();
+                filter.type = (i === 0) ? 'lowshelf' : (i === 4) ? 'highshelf' : 'peaking';
+                filter.frequency.value = freq;
+                filter.gain.value = 0;
+                filters.push(filter);
+                prevNode.connect(filter);
+                prevNode = filter;
+                
+                document.getElementById(`eq${freq}`).addEventListener('input', (e) => {
+                    filter.gain.value = e.target.value;
+                });
             });
-        });
-        
-        prevNode.connect(analyser);
-        analyser.connect(audioContext.destination);
+            
+            prevNode.connect(analyser);
+            analyser.connect(audioContext.destination);
+        }
+
+        let dataArray = new Uint8Array(analyser.frequencyBinCount);
+        function animateVisualizer() {
+            if (!visualizerAnimating) return;
+            requestAnimationFrame(animateVisualizer);
+            analyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+            let average = sum / dataArray.length;
+            let intensity = (average / 255) * 3.5;
+            
+            if(!document.body.classList.contains('theater-active')) {
+                document.getElementById('artContainer').style.boxShadow = `0 16px 44px var(--shadow), 0 0 ${24 * intensity}px rgba(255, 255, 255, ${0.35 * intensity})`;
+            }
+            
+            let bassSum = 0;
+            for (let i = 0; i < 6; i++) bassSum += dataArray[i]; 
+            let bassIntensity = (bassSum / 6) / 255;
+            
+            if (setTint.checked) {
+                bgTint.style.opacity = 0.5 + (bassIntensity * 0.45); 
+            } else {
+                bgTint.style.opacity = 0;
+            }
+        }
         animateVisualizer();
     }
 
@@ -284,27 +407,16 @@
         filters.forEach((f, i) => { f.gain.value = 0; document.getElementById(`eq${eqBands[i]}`).value = 0; });
     };
 
-    let dataArray = new Uint8Array(256);
-    function animateVisualizer() {
-        requestAnimationFrame(animateVisualizer);
-        if(audio.paused) return;
-        analyser.getByteFrequencyData(dataArray);
-        let sum = dataArray.reduce((a, b) => a + b, 0);
-        let intensity = ((sum / dataArray.length) / 255) * 3.5;
-        if(!document.body.classList.contains('theater-active')) {
-            document.getElementById('artContainer').style.boxShadow = `0 16px 44px var(--shadow), 0 0 ${24 * intensity}px rgba(255, 255, 255, ${0.35 * intensity})`;
-        }
-        if (document.getElementById('setTint').checked) {
-            let bass = (dataArray[0] + dataArray[1] + dataArray[2]) / 3 / 255;
-            document.getElementById('bgTint').style.opacity = 0.5 + (bass * 0.45); 
-        }
+    function stopVisualizer() {
+        visualizerAnimating = false;
+        document.getElementById('artContainer').style.boxShadow = `0 16px 44px var(--shadow)`;
+        bgTint.style.opacity = setTint.checked ? 0.7 : 0;
     }
 
-    // --- Phase 1: Bitrate Badging ---
+    // --- 5. Phase 1: Bitrate Badging ---
     audio.addEventListener('loadedmetadata', () => {
         const badge = document.getElementById('qualityBadge');
         if (currentMode === 'local' && playlist[current] && audio.duration) {
-            // Formula: (Bytes * 8) / Seconds = bps. Divide by 1000 for kbps.
             const kbps = Math.round(((playlist[current].file.size * 8) / audio.duration) / 1000);
             if (kbps > 600) {
                 badge.textContent = "Lossless";
@@ -318,20 +430,18 @@
         } else { badge.className = "quality-badge hide"; }
     });
 
-    // --- Phase 2: 9:16 Cinematic Theater Mode ---
+    // --- 6. Phase 2: 9:16 Cinematic Theater Mode & Gestures ---
     document.getElementById('toggleTheaterBtn').onclick = () => {
         document.body.classList.toggle('theater-active');
-        document.getElementById('artContainer').style.boxShadow = 'none'; // Reset visualizer shadow in theater
+        document.getElementById('artContainer').style.boxShadow = 'none'; 
     };
 
-    // Phase 2: Fluid Swipe Gestures
     let touchStartX = 0;
-    const card = document.getElementById('mainCard');
     card.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
     card.addEventListener('touchend', e => {
         let touchEndX = e.changedTouches[0].screenX;
-        if (touchStartX - touchEndX > 50) next(); // Swipe Left -> Next
-        if (touchEndX - touchStartX > 50) prev(); // Swipe Right -> Prev
+        if (touchStartX - touchEndX > 50) next(); 
+        if (touchEndX - touchStartX > 50) prev(); 
     }, {passive: true});
 
     // Phase 2: Canvas Story Export (9:16)
@@ -342,28 +452,23 @@
         canvas.width = 1080; canvas.height = 1920;
         const ctx = canvas.getContext('2d');
         
-        // Draw Dark Background
         ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Draw Album Art (Blurred BG + Main Art)
         const img = new Image();
         img.crossOrigin = "Anonymous";
         img.onload = () => {
-            // Blurred backdrop
             ctx.filter = 'blur(60px) brightness(0.5)';
             ctx.drawImage(img, -200, -200, 1480, 2320);
             ctx.filter = 'none';
             
-            // Central Art (Simulating the card)
             const artSize = 880; const marginX = 100; const marginY = 300;
             ctx.save();
             ctx.beginPath();
-            ctx.roundRect(marginX, marginY, artSize, artSize, 40); // Rounded corners
+            ctx.roundRect(marginX, marginY, artSize, artSize, 40);
             ctx.clip();
             ctx.drawImage(img, marginX, marginY, artSize, artSize);
             ctx.restore();
             
-            // Text Drawing
             ctx.fillStyle = '#fff';
             ctx.font = 'bold 72px Inter, sans-serif';
             ctx.fillText(titleEl.textContent, marginX, marginY + artSize + 120);
@@ -371,12 +476,10 @@
             ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.fillText(artistEl.textContent, marginX, marginY + artSize + 180);
             
-            // Branding
             ctx.font = 'bold 32px Inter, sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.4)';
             ctx.fillText("mp33", marginX, 1800);
 
-            // Trigger Download
             try {
                 const link = document.createElement('a');
                 link.download = `mp33_story_${titleEl.textContent.replace(/\s+/g, '_')}.png`;
@@ -387,15 +490,15 @@
         img.src = artImg.src;
     };
 
-    // --- Sensor 3D Tilt ---
-    window.addEventListener('deviceorientation', (e) => {
-        if (e.beta === null || document.body.classList.contains('theater-active')) return;
-        let x = Math.max(-12, Math.min(12, (e.beta - 45) / 2)); 
-        let y = Math.max(-12, Math.min(12, e.gamma / 2.5));
-        card.style.transform = `rotateX(${-x}deg) rotateY(${y}deg)`;
-    });
+    // --- 7. Media Loading & Playback ---
+    const fmt = s => isNaN(s)?'0:00':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+    function updateProgressUI(currentTime, duration) {
+        seek.max = Math.floor(duration || 0);
+        seek.value = Math.floor(currentTime || 0);
+        document.getElementById('cur').textContent = fmt(currentTime);
+        document.getElementById('dur').textContent = fmt(duration);
+    }
 
-    // --- Playback Engine (Truncated to fit, identical logic) ---
     async function extractTags(file){
       return new Promise(resolve=>{
         window.jsmediatags.read(file, {
@@ -411,24 +514,45 @@
       });
     }
 
-    document.getElementById('fileInput').addEventListener('change', async e => {
-      for (const f of [...e.target.files]) { playlist.push({ file:f, url: URL.createObjectURL(f), isYouTube: false, ...(await extractTags(f)) }); }
-      if (current === -1) load(0);
+    async function addFiles(fileList){
+      const audios = [...fileList].filter(f => f.type.startsWith('audio/') || !!f.name.match(/\.(mp3|wav|ogg|flac|m4a|aac)$/i));
+      for (const f of audios){
+        const url = URL.createObjectURL(f);
+        const tags = await extractTags(f);
+        playlist.push({ file:f, url, isYouTube: false, ...tags });
+      }
+      if (current === -1 && playlist.length) load(0);
       renderQueue();
-    });
+    }
 
     function load(index) {
       if (!playlist[index]) return;
       current = index; const t = playlist[index];
       titleEl.textContent = t.title; artistEl.textContent = t.artist;
       
-      artImg.src = t.cover || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Crect width='100%25' height='100%25' fill='%23000'/%3E%3C/svg%3E";
-      bg.style.backgroundImage = `url('${artImg.src}')`;
-      
-      audio.src = t.url; audio.load();
-      audio.oncanplaythrough = () => { initWebAudio(); if(audioContext.state==='suspended') audioContext.resume(); audio.play(); };
+      if (t.isYouTube) {
+          document.getElementById('youtubePlayer').classList.add('active');
+          artImg.style.opacity = '0';
+          if (youtubePlayerInstance) { youtubePlayerInstance.loadVideoById(t.videoId); } 
+          else { document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${t.videoId}?autoplay=1&enablejsapi=1`; }
+          if (t.cover) updateBackground(t.cover);
+          audio.pause(); 
+          stopVisualizer();
+      } else {
+          document.getElementById('youtubePlayer').classList.remove('active');
+          artImg.style.opacity = '1';
+          audio.src = t.url; audio.load();
+          audio.oncanplaythrough = () => { initWebAudio(); if(audioContext.state==='suspended') audioContext.resume(); audio.play(); };
+          if (t.cover) { artImg.src = t.cover; updateBackground(t.cover); } 
+          else {
+            const svg = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><rect width='100%' height='100%' fill='%23000'/></svg>`)}`;
+            artImg.src = svg; updateBackground(svg);
+          }
+          if (youtubePlayerInstance?.pauseVideo) youtubePlayerInstance.pauseVideo();
+      }
+      renderQueue();
     }
-    
+
     function play(){ currentMode === 'local' ? audio.play() : youtubePlayerInstance?.playVideo(); }
     function pause(){ currentMode === 'local' ? audio.pause() : youtubePlayerInstance?.pauseVideo(); }
     function next(){ if (current < playlist.length-1) load(current+1); else { pause(); if(currentMode === 'local') audio.currentTime = 0; } }
@@ -436,17 +560,27 @@
 
     document.getElementById('playPause').onclick = () => {
         if(currentMode==='local') { if(audioContext && audioContext.state==='suspended') audioContext.resume(); audio.paused ? play() : pause(); }
+        else if (youtubePlayerInstance) { youtubePlayerInstance.getPlayerState() === YT.PlayerState.PLAYING ? pause() : play(); }
     };
     document.getElementById('next').onclick = next; document.getElementById('prev').onclick = prev;
+    document.getElementById('fileInput').addEventListener('change', e=> addFiles(e.target.files));
+    document.getElementById('folderInput').addEventListener('change', e=> addFiles(e.target.files));
     
     audio.ontimeupdate = () => {
-      document.getElementById('seek').max = audio.duration || 0;
-      document.getElementById('seek').value = audio.currentTime || 0;
+      updateProgressUI(audio.currentTime, audio.duration);
       document.getElementById('playPause').innerHTML = !audio.paused ? '<div class="pause-bars"><div class="bar"></div><div class="bar"></div></div>' : '<div class="tri-right"></div>';
     };
-    document.getElementById('seek').oninput = e => audio.currentTime = e.target.value;
+    document.getElementById('seek').oninput = e => {
+      if (currentMode === 'local') audio.currentTime = e.target.value;
+      else if (youtubePlayerInstance?.seekTo) youtubePlayerInstance.seekTo(e.target.value, true);
+    };
+    audio.addEventListener('ended', () => { if (current < playlist.length-1) next(); else pause(); });
 
-    // UI Overlay Toggles
+    document.getElementById('setRounded').onchange = (e)=> {
+      document.documentElement.style.setProperty('--art-radius', e.target.checked ? '22px' : '0px');
+    };
+    
+    // --- 8. UI Overlays ---
     const openPanel = (id) => document.getElementById(id).classList.add('active');
     const closePanel = (id) => document.getElementById(id).classList.remove('active');
     
@@ -456,19 +590,151 @@
     document.getElementById('closeSettings').onclick = () => closePanel('settingsOv');
     document.getElementById('openStudioBtn').onclick = () => openPanel('studioOv');
     document.getElementById('closeStudio').onclick = () => closePanel('studioOv');
+    document.getElementById('openAIFeatures').onclick = () => openPanel('aiFeaturesOv');
+    document.getElementById('closeAIFeatures').onclick = () => closePanel('aiFeaturesOv');
+    document.getElementById('closeArtistInfo').onclick = () => closePanel('artistInfoOv');
+    document.getElementById('closeSongSummary').onclick = () => closePanel('songSummaryOv');
+    document.getElementById('closeLyricsFinder').onclick = () => closePanel('lyricsFinderOv');
+
+    document.getElementById('setModeLocal').addEventListener('click', () => setPlayerMode('local'));
+    document.getElementById('setModeYouTube').addEventListener('click', () => setPlayerMode('youtube'));
+
+    function setPlayerMode(mode) {
+        if (currentMode === mode) return;
+        currentMode === 'local' ? audio.pause() : youtubePlayerInstance?.pauseVideo?.();
+        currentMode = mode; playlist = []; current = -1;
+        titleEl.textContent = 'No Track'; artistEl.textContent = '—'; updateProgressUI(0, 0);
+
+        if (mode === 'local') {
+            document.getElementById('fileUploads').classList.remove('hide');
+            document.getElementById('ytUploads').classList.add('hide');
+            document.getElementById('setModeLocal').classList.add('active');
+            document.getElementById('setModeYouTube').classList.remove('active');
+            stopVisualizer();
+        } else {
+            document.getElementById('fileUploads').classList.add('hide');
+            document.getElementById('ytUploads').classList.remove('hide');
+            document.getElementById('setModeLocal').classList.remove('active');
+            document.getElementById('setModeYouTube').classList.add('active');
+        }
+        renderQueue();
+    }
 
     function renderQueue(){
       const q = document.getElementById('queueList'); q.innerHTML = '';
+      if(!playlist.length) { q.innerHTML = '<div class="small" style="opacity:0.5; text-align:center; padding: 20px 0;">Queue is empty.</div>'; return; }
       playlist.forEach((t, i)=>{
         const item = document.createElement('div'); item.className = 'upnext-item';
-        item.innerHTML = `<div class="dot"></div><div style="flex:1;"><div style="font-weight:600; font-size:14px;">${t.title}</div><div style="opacity:0.6; font-size:12px;">${t.artist}</div></div>`;
+        if (i === current) item.style.background = 'rgba(255,255,255,0.12)';
+        item.innerHTML = `<div class="dot"></div><div style="flex:1; min-width:0;"><div style="font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.title||'Unknown'}</div><div style="opacity:0.6; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">${t.artist||'Unknown Artist'}</div></div>`;
         item.onclick = () => { load(i); closePanel('queueOv'); };
         q.appendChild(item);
       });
     }
 
-    // Splash
-    window.onload = () => setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; document.getElementById('splashScreen').style.visibility = 'hidden'; }, 1600);
+    // --- 9. BYOK AI Engine ---
+    document.getElementById('saveKeyBtn').onclick = () => {
+      const keyVal = document.getElementById('geminiApiKeyInput').value.trim();
+      localStorage.setItem('mp33_gemini_key', keyVal);
+      alert(keyVal ? 'Gemini API Key initialized successfully.' : 'API Key cleared.');
+    };
+
+    async function fetchGeminiAI(userPrompt, systemInstruction) {
+      const apiKey = localStorage.getItem('mp33_gemini_key');
+      if(!apiKey) throw new Error("Missing API Key. Add a valid Gemini API Key in Settings.");
+      
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemInstruction }] }
+        })
+      });
+      
+      if(!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `Error status ${response.status}`);
+      }
+      const result = await response.json();
+      return result.candidates?.[0]?.content?.parts?.[0]?.text || "Parsing error.";
+    }
+
+    document.getElementById('aiArtistInfoBtn').onclick = async () => {
+      if (current === -1) return alert('Please play a track first.');
+      closePanel('aiFeaturesOv'); openPanel('artistInfoOv');
+      document.getElementById('artistInfoContent').innerHTML = '<div class="spinner"></div> Discovering...';
+      try {
+        const artist = playlist[current].artist || 'Unknown Artist';
+        document.getElementById('artistInfoContent').textContent = await fetchGeminiAI(`Provide a concise single-paragraph biography for the artist "${artist}".`, "Act as an elegant music journalist. Keep it to one paragraph without markdown bold formatting.");
+      } catch(err) { document.getElementById('artistInfoContent').textContent = err.message; }
+    };
+
+    document.getElementById('aiSongSummaryBtn').onclick = async () => {
+      if (current === -1) return alert('Please play a track first.');
+      closePanel('aiFeaturesOv'); openPanel('songSummaryOv');
+      document.getElementById('songSummaryContent').innerHTML = '<div class="spinner"></div> Analyzing...';
+      try {
+        document.getElementById('songSummaryContent').textContent = await fetchGeminiAI(`Analyze the track "${playlist[current].title}" by "${playlist[current].artist}". Describe its structural arrangement and mood in two clear sentences.`, "Act as a music analyst. Respond with exactly two sentences.");
+      } catch(err) { document.getElementById('songSummaryContent').textContent = err.message; }
+    };
+
+    document.getElementById('aiLyricsFinderBtn').onclick = async () => {
+      if (current === -1) return alert('Please play a track first.');
+      closePanel('aiFeaturesOv'); openPanel('lyricsFinderOv');
+      document.getElementById('lyricsContent').innerHTML = '<div class="spinner"></div> Sourcing...';
+      try {
+        document.getElementById('lyricsContent').textContent = await fetchGeminiAI(`Provide the lyrics for "${playlist[current].title}" by "${playlist[current].artist}".`, "Return pure lyrics structured in stanzas. No intros, commentary, or markdown blocks.");
+      } catch(err) { document.getElementById('lyricsContent').textContent = err.message; }
+    };
+
+    // --- 10. YouTube API ---
+    const YOUTUBE_API_KEY = "AIzaSyCRp1Gqj5yO2EHlUdlbTVipFWgFGAOM40Y";
+    document.getElementById('ytLoadBtn').addEventListener('click', async () => {
+        const url = document.getElementById('ytUrlInput').value.trim();
+        const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+        if (videoIdMatch) {
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIdMatch[1]}&key=${YOUTUBE_API_KEY}`);
+                const data = await res.json();
+                if (data.items?.length > 0) {
+                    const item = data.items[0].snippet;
+                    playlist = [{ title: item.title, artist: item.channelTitle, cover: item.thumbnails.high?.url, isYouTube: true, videoId: videoIdMatch[1] }];
+                    load(0);
+                }
+            } catch (error) { alert('Error retrieving YouTube link metadata.'); }
+        } else if (url.includes('list=')) {
+            const playlistId = url.match(/(?:list=)([^&]+)/)[1];
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`);
+                const data = await res.json();
+                if (data.items?.length > 0) {
+                    playlist = data.items.map(item => ({ title: item.snippet.title, artist: item.snippet.videoOwnerChannelTitle || item.snippet.channelTitle, cover: item.snippet.thumbnails.high?.url, isYouTube: true, videoId: item.snippet.resourceId.videoId }));
+                    load(0);
+                }
+            } catch (error) { alert('Error retrieving Playlist.'); }
+        } else { alert('Invalid URL'); }
+    });
+
+    function onYouTubeIframeAPIReady() {
+        youtubePlayerInstance = new YT.Player('youtubeIframe', {
+            height: '100%', width: '100%',
+            playerVars: { 'autoplay': 0, 'controls': 0, 'rel': 0, 'iv_load_policy': 3 },
+            events: {
+                'onReady': () => {
+                    setInterval(() => {
+                        if(currentMode === 'youtube' && youtubePlayerInstance?.getCurrentTime) {
+                            updateProgressUI(youtubePlayerInstance.getCurrentTime(), youtubePlayerInstance.getDuration());
+                        }
+                    }, 500);
+                },
+                'onStateChange': (event) => { 
+                  document.getElementById('playPause').innerHTML = event.data === YT.PlayerState.PLAYING ? '<div class="pause-bars"><div class="bar"></div><div class="bar"></div></div>' : '<div class="tri-right"></div>'; 
+                }
+            }
+        });
+    }
   </script>
 </body>
 </html>
