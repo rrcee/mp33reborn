@@ -15,14 +15,14 @@
   <style>
     :root {
       --theme-r: 20; --theme-g: 20; --theme-b: 20;
-      --glass: rgba(255, 255, 255, 0.08);
-      --glass-strong: rgba(255, 255, 255, 0.14);
+      --glass: rgba(255, 255, 255, 0.12);
+      --glass-strong: rgba(255, 255, 255, 0.2);
       --on-glass: rgba(255, 255, 255, 0.95);
-      --shadow: rgba(0, 0, 0, 0.6);
-      --art-radius: 22px;
-      /* Adjusted tint to let the blurred art shine through */
-      --tint-0: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.35);
-      --tint-1: rgba(0, 0, 0, 0.75);
+      --shadow: rgba(0, 0, 0, 0.4);
+      --art-radius: 24px;
+      /* Vibrant color tint that matches your milky reference image perfectly */
+      --tint-0: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.4);
+      --tint-1: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.1);
     }
     
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -37,31 +37,31 @@
     @keyframes cinematicScale { 0% { transform: scale(0.8); opacity: 0; letter-spacing: -0.1em; filter: blur(12px); } 100% { transform: scale(1); opacity: 1; letter-spacing: 0.05em; filter: blur(0); } }
     @keyframes fadeUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
     
-    /* True Blurred Art Background Engine */
-    .bg { position: fixed; inset: 0; background-color: #111; background-position: center; background-size: cover; background-repeat: no-repeat; filter: blur(48px) brightness(0.65) saturate(1.5); transform: scale(1.15); transition: background-image 0.8s ease; z-index: -2; animation: bg-pan 45s infinite alternate; }
+    /* Highly Saturated Blurred Art Backdrop */
+    .bg { position: fixed; inset: 0; background-color: #151515; background-position: center; background-size: cover; background-repeat: no-repeat; filter: blur(44px) brightness(0.7) saturate(1.8); transform: scale(1.15); transition: background-image 0.8s cubic-bezier(0.16, 1, 0.3, 1); z-index: -2; animation: bg-pan 45s infinite alternate; }
     @keyframes bg-pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-    .bg-tint { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(180deg, var(--tint-0) 0%, var(--tint-1) 100%); transition: opacity 0.1s ease-out; opacity: 0.8; }
+    .bg-tint { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(135deg, var(--tint-0) 0%, var(--tint-1) 100%); transition: opacity 0.3s ease; opacity: 0.9; }
     
     /* Main Layout */
     .wrap { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; transition: padding 0.5s; }
-    .card { width: 100%; max-width: 410px; border-radius: 28px; background: var(--glass); display: flex; flex-direction: column; gap: 16px; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 24px 60px var(--shadow), inset 0 1px 1px rgba(255,255,255,0.08); padding: 20px 20px 16px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); perspective: 1000px; }
+    .card { width: 100%; max-width: 410px; border-radius: 32px; background: var(--glass); display: flex; flex-direction: column; gap: 20px; backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); box-shadow: 0 24px 64px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.15); padding: 24px; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     
-    /* 3D Parallax Art Container */
-    .art-container { position: relative; width: 100%; border-radius: var(--art-radius); overflow: hidden; background: #0a0a0a; box-shadow: 0 16px 44px var(--shadow); transition: transform 0.1s ease-out, border-radius 0.4s; transform-style: preserve-3d; }
+    /* 3D Isolated Parallax Art Layer */
+    .art-container { position: relative; width: 100%; border-radius: var(--art-radius); overflow: hidden; background: #080808; box-shadow: 0 16px 40px rgba(0,0,0,0.3); transition: transform 0.15s ease-out, border-radius 0.4s; transform-style: preserve-3d; perspective: 1000px; }
     .art-content-wrapper { position: relative; width: 100%; padding-bottom: 100%; }
     #artImg { position: absolute; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s; }
     
-    /* THEATER MODE (9:16 Cinematic) */
+    /* THEATER MODE (9:16 Immersive) */
     body.theater-active .wrap { padding: 0; align-items: flex-end; }
-    body.theater-active .card { max-width: 100%; height: 100%; border-radius: 0; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; justify-content: flex-end; padding: 40px 24px 30px; border: none; perspective: none; gap: 24px; }
-    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.6; transform: none !important; } 
-    body.theater-active .title { text-align: center; margin-bottom: 12px; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+    body.theater-active .card { max-width: 100%; height: 100%; border-radius: 0; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; justify-content: flex-end; padding: 40px 24px 40px; border: none; gap: 24px; }
+    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.65; transform: none !important; } 
+    body.theater-active .title { text-align: center; margin-bottom: 16px; text-shadow: 0 4px 24px rgba(0,0,0,0.9); }
     body.theater-active .title h1 { font-size: 32px; font-weight: 900; }
-    body.theater-active .title p { font-size: 18px; opacity: 0.8; }
+    body.theater-active .title p { font-size: 18px; opacity: 0.85; }
     body.theater-active .uploads, body.theater-active .yt-input-group, body.theater-active .bottom-actions { display: none !important; }
 
     /* Quality Badge */
-    .quality-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 10; transition: opacity 0.3s; }
+    .quality-badge { position: absolute; top: 14px; right: 12px; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 10; transition: opacity 0.3s; }
     .quality-badge.lossless { color: #00e5ff; border-color: rgba(0,229,255,0.3); }
 
     .video-container { position: absolute; inset: 0; width: 100%; height: 100%; display: none; opacity: 0; transition: opacity 0.4s; }
@@ -70,10 +70,10 @@
 
     /* Typography */
     .title { width: 100%; text-align: left; padding: 4px 2px 0; transition: all 0.4s; }
-    .title h1 { font-size: 22px; line-height: 1.25; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.02em; }
+    .title h1 { font-size: 22px; line-height: 1.25; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
     .title p { font-size: 15px; opacity: 0.65; margin: 0; font-weight: 400; }
 
-    /* Inputs & Buttons */
+    /* File / Folder Buttons */
     .uploads, .yt-input-group { display: flex; gap: 10px; width: 100%; transition: opacity 0.3s; }
     .yt-input-group input, .key-input-group input { flex: 1; padding: 12px 14px; border: none; border-radius: 14px; background: var(--glass-strong); color: var(--on-glass); outline: none; font-family: inherit; font-size: 13px; }
     .btn-upload, .mode-btn { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 14px; background: var(--glass-strong); color: var(--on-glass); border: none; font-family: inherit; font-size: 13px; font-weight: 600; user-select: none; transition: background 0.2s, transform 0.1s; }
@@ -81,51 +81,48 @@
     input[type=file] { display: none; }
     .hide { display: none !important; opacity: 0; pointer-events: none; }
 
-    /* Flicker-Free Animated Timeline */
-    .seek-container { width: 100%; margin-top: 4px; }
+    /* Smooth Progress Timeline */
+    .seek-container { width: 100%; }
     .time-row { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.6; margin: 8px 0 0; font-variant-numeric: tabular-nums; font-weight: 600; }
     
     .seek-wrap { position: relative; height: 24px; display: flex; align-items: center; cursor: pointer; }
-    .seek-track { position: absolute; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; pointer-events: none; }
+    .seek-track { position: absolute; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; pointer-events: none; }
     .seek-fill { position: absolute; left: 0; height: 4px; background: #fff; border-radius: 2px; width: 0%; pointer-events: none; }
     .seek-thumb { position: absolute; left: 0%; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); transform: translateX(-50%); pointer-events: none; }
     .seek-input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; margin: 0; }
-    
-    /* Only transition when resetting to prevent flickering during playback */
     .seek-resetting .seek-fill, .seek-resetting .seek-thumb { transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), left 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-    /* Controls Rows (Bigger Media Controls) */
-    .transport { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
-    .bottom-actions { width: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); }
+    /* Controls Grid Layout (Increased Card Space) */
+    .transport { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+    .bottom-actions { width: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-    .glass-visor { display: flex; align-items: center; gap: 16px; background: var(--glass-strong); border-radius: 9999px; padding: 8px 16px; backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
-    .btn { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; color: #000; cursor: pointer; user-select: none; transition: transform 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-    .btn-secondary { width: 52px; height: 52px; background: rgba(255,255,255,0.1); color: #fff; box-shadow: none; }
+    .glass-visor { display: flex; align-items: center; gap: 16px; background: var(--glass-strong); border-radius: 9999px; padding: 8px 16px; backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+    .btn { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; color: #000; cursor: pointer; user-select: none; transition: transform 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .btn-secondary { width: 52px; height: 52px; background: rgba(255,255,255,0.12); color: #fff; box-shadow: none; }
     .btn:active { transform: scale(0.92); }
     
-    /* Scaled up Icons */
     .tri-right { width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid currentColor; margin-left: 4px; }
     .pause-bars { display: flex; gap: 6px; }
     .pause-bars .bar { width: 6px; height: 22px; background: currentColor; border-radius: 2px; }
     .skip-body { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid currentColor; }
     .skip-line { width: 4px; height: 20px; background: currentColor; border-radius: 2px; }
     
-    /* Clean SVG Transport Icons */
-    .icon-link { width: 44px; height: 44px; background: var(--glass-strong); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; color: #fff; user-select: none; }
+    /* Clean System SVG Icon Links */
+    .icon-link { width: 46px; height: 46px; background: var(--glass-strong); border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; color: #fff; user-select: none; }
     .icon-link:active { transform: scale(0.92); background: rgba(255,255,255,0.25); }
     .icon-link svg { width: 22px; height: 22px; stroke-width: 2px; }
 
-    /* Bottom Overlays */
+    /* Modern Bottom Overlays */
     .overlay { position: fixed; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0); pointer-events: none; z-index: 100; transition: background-color 0.4s; }
     .overlay.active { background: rgba(0,0,0,0.5); pointer-events: auto; }
-    .sheet { width: 100%; max-width: 430px; background: rgba(20, 20, 20, 0.9); color: #fff; padding: 20px 20px 30px; max-height: 80vh; overflow-y: auto; border-top-left-radius: 28px; border-top-right-radius: 28px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(40px); box-shadow: 0 -12px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .sheet { width: 100%; max-width: 430px; background: rgba(20, 20, 20, 0.92); color: #fff; padding: 24px 24px 34px; max-height: 80vh; overflow-y: auto; border-top-left-radius: 28px; border-top-right-radius: 28px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(40px); box-shadow: 0 -12px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.1); }
     .overlay.active .sheet { transform: translateY(0); }
     .sheet h3 { margin: 0 0 16px; font-size: 18px; font-weight: 700; }
     .sheet-close-btn { background: var(--glass-strong); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .upnext-item { padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.04); margin-bottom: 8px; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: background 0.2s; }
     .upnext-item:active { background: rgba(255,255,255,0.1); }
     
-    /* EQ Sliders */
+    /* EQ Layout */
     .eq-grid { display: flex; justify-content: space-between; height: 160px; padding: 10px 0; margin-bottom: 10px; }
     .eq-band { display: flex; flex-direction: column; align-items: center; height: 100%; }
     .eq-slider { writing-mode: vertical-lr; direction: rtl; appearance: slider-vertical; width: 10px; height: 100px; margin: auto; }
@@ -140,15 +137,15 @@
     .action-row-btn { background: var(--glass-strong); padding: 12px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 600; font-size: 14px; user-select: none; transition: background 0.2s; margin-bottom: 8px; }
     .action-row-btn:active { background: rgba(255,255,255,0.2); }
 
-    /* Mobile Scale Adjustments */
+    /* Responsive Scale for Handsets */
     @media (max-width: 430px) {
-        .card { padding: 18px 14px 16px; gap: 14px; }
-        .icon-link { width: 40px; height: 40px; border-radius: 10px; }
-        .icon-link svg { width: 18px; height: 18px; }
+        .card { padding: 20px 16px 16px; gap: 16px; border-radius: 28px; }
+        .icon-link { width: 40px; height: 40px; border-radius: 12px; }
+        .icon-link svg { width: 20px; height: 20px; }
         .glass-visor { padding: 6px 12px; gap: 12px; }
         .btn { width: 56px; height: 56px; }
-        .btn-secondary { width: 48px; height: 48px; }
-        .bottom-actions { gap: 12px; padding-top: 14px; margin-top: 10px; }
+        .btn-secondary { width: 46px; height: 48px; }
+        .bottom-actions { gap: 14px; padding-top: 14px; margin-top: 8px; }
     }
   </style>
 </head>
@@ -193,7 +190,6 @@
       </div>
 
       <div class="seek-container">
-        <!-- Flicker-Free Animated Timeline -->
         <div id="seekWrap" class="seek-wrap">
           <div class="seek-track"></div>
           <div class="seek-fill" id="seekFill"></div>
@@ -208,7 +204,7 @@
 
       <!-- Core Transport Row -->
       <div class="transport">
-        <div class="icon-link" title="Up Next" onclick="document.getElementById('queueOv').classList.add('active')">
+        <div id="openQueue" class="icon-link" title="Up Next">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
         </div>
         
@@ -218,20 +214,20 @@
           <div id="next" class="btn btn-secondary"><div class="skip-body"></div><div class="skip-line"></div></div>
         </div>
 
-        <div class="icon-link" title="Settings" onclick="document.getElementById('settingsOv').classList.add('active')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <div id="openSettings" class="icon-link" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2 2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
       </div>
 
       <!-- Action Utilities Row -->
       <div class="bottom-actions">
-        <div class="icon-link" title="Cinematic Mode" onclick="document.body.classList.toggle('theater-active'); document.getElementById('artContainer').style.boxShadow = 'none';">
+        <div id="toggleTheaterBtn" class="icon-link" title="Cinematic Mode">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
         </div>
-        <div class="icon-link" title="Studio EQ" onclick="document.getElementById('studioOv').classList.add('active')">
+        <div id="openStudioBtn" class="icon-link" title="Studio EQ">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1v-3h3v1z"></path><path d="M3 19a2 2 0 0 0 2 2h1v-3H3v1z"></path></svg>
         </div>
-        <div class="icon-link" title="AI Features" onclick="document.getElementById('aiFeaturesOv').classList.add('active')">
+        <div id="openAIFeatures" class="icon-link" title="AI Features">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
         </div>
         <div id="exportStoryBtn" class="icon-link" title="Export for Stories">
@@ -245,7 +241,7 @@
   <!-- Overlays -->
   <div id="studioOv" class="overlay">
     <div class="sheet">
-      <div class="row"><h3>Studio EQ</h3><div class="sheet-close-btn" onclick="document.getElementById('studioOv').classList.remove('active')">Close</div></div>
+      <div class="row"><h3>Studio EQ</h3><div class="sheet-close-btn" id="closeStudio">Close</div></div>
       <div class="small" style="margin-bottom:15px;">Hardware EQ active for local files.</div>
       <div class="eq-grid">
         <div class="eq-band"><input type="range" class="eq-slider" id="eq60" min="-12" max="12" value="0"><div class="eq-label">60</div></div>
@@ -260,14 +256,14 @@
 
   <div id="queueOv" class="overlay">
     <div class="sheet">
-      <div class="row"><h3>Up Next</h3><div class="sheet-close-btn" onclick="document.getElementById('queueOv').classList.remove('active')">Close</div></div>
+      <div class="row"><h3>Up Next</h3><div class="sheet-close-btn" id="closeQueue">Close</div></div>
       <div id="queueList"></div>
     </div>
   </div>
   
   <div id="settingsOv" class="overlay" role="dialog">
     <div class="sheet">
-      <div class="row"><h3>Settings</h3><div class="sheet-close-btn" onclick="document.getElementById('settingsOv').classList.remove('active')">Close</div></div>
+      <div class="row"><h3>Settings</h3><div class="sheet-close-btn" id="closeSettings">Close</div></div>
       <div class="row hide" style="margin:14px 0;" id="installAppRow"><div><div>Install App</div></div><button id="installPwaBtn" class="btn-upload" style="flex: 0 0 80px; background: #fff; color: #000;">Install</button></div>
       <div class="row" style="margin:14px 0;"><div><div>Player Mode</div></div><div style="display: flex; gap: 8px; width: 160px;"><button id="setModeLocal" class="mode-btn active">Local</button><button id="setModeYouTube" class="mode-btn">YouTube</button></div></div>
       <div class="row" style="margin:14px 0;"><div><div>Progressive background tint</div></div><input id="setTint" type="checkbox" class="toggle" checked></div>
@@ -278,7 +274,7 @@
 
   <div id="aiFeaturesOv" class="overlay">
     <div class="sheet">
-      <div class="row"><h3>AI Features</h3><div class="sheet-close-btn" onclick="document.getElementById('aiFeaturesOv').classList.remove('active')">Close</div></div>
+      <div class="row"><h3>AI Features</h3><div class="sheet-close-btn" id="closeAIFeatures">Close</div></div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         <div id="aiArtistInfoBtn" class="action-row-btn">Artist Biography</div>
         <div id="aiSongSummaryBtn" class="action-row-btn">Song Summary</div>
@@ -287,16 +283,16 @@
     </div>
   </div>
   
-  <div id="artistInfoOv" class="overlay"><div class="sheet"><div class="row"><h3>Artist Info</h3><div class="sheet-close-btn" onclick="document.getElementById('artistInfoOv').classList.remove('active')">Close</div></div><div id="artistInfoContent" class="small"></div></div></div>
-  <div id="songSummaryOv" class="overlay"><div class="sheet"><div class="row"><h3>Song Summary</h3><div class="sheet-close-btn" onclick="document.getElementById('songSummaryOv').classList.remove('active')">Close</div></div><div id="songSummaryContent" class="small"></div></div></div>
-  <div id="lyricsFinderOv" class="overlay"><div class="sheet"><div class="row"><h3>Lyrics Finder</h3><div class="sheet-close-btn" onclick="document.getElementById('lyricsFinderOv').classList.remove('active')">Close</div></div><div id="lyricsContent" class="small" style="white-space: pre-wrap;"></div></div></div>
+  <div id="artistInfoOv" class="overlay"><div class="sheet"><div class="row"><h3>Artist Info</h3><div class="sheet-close-btn" id="closeArtistInfo">Close</div></div><div id="artistInfoContent" class="small"></div></div></div>
+  <div id="songSummaryOv" class="overlay"><div class="sheet"><div class="row"><h3>Song Summary</h3><div class="sheet-close-btn" id="closeSongSummary">Close</div></div><div id="songSummaryContent" class="small"></div></div></div>
+  <div id="lyricsFinderOv" class="overlay"><div class="sheet"><div class="row"><h3>Lyrics Finder</h3><div class="sheet-close-btn" id="closeLyricsFinder">Close</div></div><div id="lyricsContent" class="small" style="white-space: pre-wrap;"></div></div></div>
 
   <audio id="audio"></audio>
   <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // --- Initial Config & Cleanups ---
+    // --- 1. Initial Config & Cleanup ---
     const savedKey = localStorage.getItem('mp33_gemini_key');
     if (savedKey) document.getElementById('geminiApiKeyInput').value = savedKey;
 
@@ -318,7 +314,7 @@
       deferredPrompt = null; document.getElementById('installAppRow').classList.add('hide');
     });
 
-    // --- 3D Parallax Hover (Safely applied to Art Only) ---
+    // --- 2. 3D Isolated Parallax Hover Engine ---
     const artLayer = document.getElementById('artContainer');
     window.addEventListener('deviceorientation', (e) => {
         if (e.beta === null || document.body.classList.contains('theater-active')) return;
@@ -333,16 +329,15 @@
         artLayer.style.transform = `rotateX(${y}deg) rotateY(${-x}deg)`;
     });
 
-    // --- Core Player Engine ---
+    // --- 3. Color Extraction & Dynamic Backgrounds ---
     const audio = document.getElementById('audio'), artImg = document.getElementById('artImg'), bg = document.getElementById('bg');
-    const titleEl = document.getElementById('trackTitle'), artistEl = document.getElementById('trackArtist');
+    const titleEl = document.getElementById('trackTitle'), artistEl = document.getElementById('trackArtist'), seek = document.getElementById('seek');
     let playlist = [], current = -1, currentMode = 'local', youtubePlayerInstance;
     
-    // Fixed Background Extractor
     function updateBackground(src) {
         bg.style.backgroundImage = `url('${src}')`;
         const tempImg = new Image();
-        if (!src.startsWith('data:')) tempImg.crossOrigin = "Anonymous"; 
+        if (!src.startsWith('data:') && !src.startsWith('blob:')) tempImg.crossOrigin = "Anonymous"; 
         tempImg.onload = () => {
             try {
                 const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
@@ -362,7 +357,7 @@
         tempImg.src = src;
     }
 
-    // --- Web Audio EQ & Visualizer ---
+    // --- 4. Web Audio EQ & Engine Layouts ---
     let audioContext, analyser, source, filters = [], visualizerAnimating = false;
     const eqBands = [60, 230, 910, 3600, 14000], setTint = document.getElementById('setTint');
     
@@ -386,7 +381,9 @@
         function animateVisualizer() {
             if (!visualizerAnimating) return; requestAnimationFrame(animateVisualizer); analyser.getByteFrequencyData(dataArray);
             let sum = 0; for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+            let average = sum / dataArray.length;
             let intensity = ((sum / dataArray.length) / 255) * 3.5;
+            
             if(!document.body.classList.contains('theater-active')) document.getElementById('artContainer').style.boxShadow = `0 16px 44px var(--shadow), 0 0 ${24 * intensity}px rgba(255, 255, 255, ${0.35 * intensity})`;
             if (setTint.checked) { let bass = (dataArray[0] + dataArray[1] + dataArray[2]) / 3 / 255; document.getElementById('bgTint').style.opacity = 0.4 + (bass * 0.4); } 
             else { document.getElementById('bgTint').style.opacity = 0; }
@@ -396,7 +393,7 @@
     document.getElementById('resetEQBtn').onclick = () => filters.forEach((f, i) => { f.gain.value = 0; document.getElementById(`eq${eqBands[i]}`).value = 0; });
     function stopVisualizer() { visualizerAnimating = false; document.getElementById('artContainer').style.boxShadow = `0 16px 44px var(--shadow)`; document.getElementById('bgTint').style.opacity = setTint.checked ? 0.7 : 0; }
 
-    // --- Bitrate Badging ---
+    // --- 5. Bitrate Badging ---
     audio.addEventListener('loadedmetadata', () => {
         const badge = document.getElementById('qualityBadge');
         if (currentMode === 'local' && playlist[current] && audio.duration) {
@@ -407,7 +404,7 @@
         } else badge.className = "quality-badge hide";
     });
 
-    // --- Flicker-Free Animated Timeline ---
+    // --- 6. Timeline Progress Physics ---
     const seekInput = document.getElementById('seek');
     const seekWrap = document.getElementById('seekWrap');
     const seekFill = document.getElementById('seekFill');
@@ -427,7 +424,6 @@
         let percent = duration ? ((isDraggingSeek ? seekInput.value : currentTime) / duration) * 100 : 0;
         
         if (!isDraggingSeek) {
-            // Only transition when returning to 0 (song reset/skip) to prevent flicker
             seekWrap.className = (currentTime < 0.5 && duration > 0) ? 'seek-wrap seek-resetting' : 'seek-wrap';
         } else {
             seekWrap.className = 'seek-wrap'; 
@@ -446,7 +442,7 @@
         document.getElementById('cur').textContent = fmt(seekInput.value);
     });
 
-    // --- 9:16 Cinematic Theater Swipe Gestures ---
+    // --- 7. Theater Mode Gestures ---
     let touchStartX = 0;
     const cardContainer = document.getElementById('mainCard');
     cardContainer.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
@@ -456,12 +452,11 @@
         if (touchEndX - touchStartX > 50) prev(); 
     }, {passive: true});
 
-    // --- Spotify Recapped Style Story Export ---
+    // --- 8. Spotify Recapped Story Export ---
     document.getElementById('exportStoryBtn').onclick = () => {
         if(current === -1 || currentMode !== 'local') return alert("Export is only available for local tracks currently playing.");
         const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1920; const ctx = canvas.getContext('2d');
         
-        // Vibrant Extracted Gradient Background
         const r = getComputedStyle(document.documentElement).getPropertyValue('--theme-r').trim() || 40;
         const g = getComputedStyle(document.documentElement).getPropertyValue('--theme-g').trim() || 40;
         const b = getComputedStyle(document.documentElement).getPropertyValue('--theme-b').trim() || 40;
@@ -470,40 +465,31 @@
         ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         const img = new Image(); 
-        if (!playlist[current].cover?.startsWith('data:')) img.crossOrigin = "Anonymous"; 
+        if (!playlist[current].cover?.startsWith('data:') && !playlist[current].cover?.startsWith('blob:')) img.crossOrigin = "Anonymous"; 
         
         img.onload = () => {
-            // Light blurred texture overlay
             ctx.globalCompositeOperation = 'overlay'; ctx.filter = 'blur(60px) opacity(0.5)';
             ctx.drawImage(img, -200, -200, 1480, 2320);
             ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
             
-            // "ON REPEAT" Pill
             ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(80, 120, 280, 60, 30); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.font = '700 24px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("ON REPEAT", 220, 158);
             
-            // Giant Drop Shadow Cover Art
             const artSize = 820; const marginX = 130; const marginY = 320;
             ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'; ctx.shadowBlur = 80; ctx.shadowOffsetY = 40;
             ctx.save(); ctx.beginPath(); ctx.roundRect(marginX, marginY, artSize, artSize, 40); ctx.fill(); ctx.clip(); ctx.drawImage(img, marginX, marginY, artSize, artSize); ctx.restore();
             
-            // Massive Typography (Recapped Vibe)
             ctx.shadowColor = 'transparent'; ctx.textAlign = 'left';
-            
-            // Title
             ctx.fillStyle = '#fff'; ctx.font = '900 84px Inter, sans-serif'; 
             let titleStr = titleEl.textContent; if(titleStr.length > 20) titleStr = titleStr.substring(0, 18) + '...';
             ctx.fillText(titleStr, 130, marginY + artSize + 160);
             
-            // Artist
             ctx.font = '600 48px Inter, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.fillText(artistEl.textContent, 130, marginY + artSize + 240);
             
-            // Progress Bar Line
             ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(130, marginY + artSize + 340, 820, 6);
             ctx.fillStyle = '#fff'; ctx.fillRect(130, marginY + artSize + 340, 380, 6);
             
-            // Branding Logo
             ctx.font = '800 32px Inter, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
             ctx.fillText("mp33 AUDIO", 130, 1800);
 
@@ -513,7 +499,7 @@
         img.src = artImg.src;
     };
 
-    // --- Media Loading & Playback Engine ---
+    // --- 9. Core Playback Engine Logic ---
     async function extractTags(file){
       return new Promise(resolve=>{
         window.jsmediatags.read(file, {
@@ -564,7 +550,6 @@
     
     audio.ontimeupdate = () => { updateProgressUI(audio.currentTime, audio.duration); document.getElementById('playPause').innerHTML = !audio.paused ? '<div class="pause-bars"><div class="bar"></div><div class="bar"></div></div>' : '<div class="tri-right"></div>'; };
     audio.addEventListener('ended', () => { if (current < playlist.length-1) next(); else pause(); });
-
     document.getElementById('setRounded').onchange = (e)=> document.documentElement.style.setProperty('--art-radius', e.target.checked ? '22px' : '0px');
 
     function setPlayerMode(mode) {
@@ -595,7 +580,45 @@
       });
     }
 
-    // --- BYOK AI Engine ---
+    // --- 10. Direct Structural UI Bindings (Isolated and Click Jitter Protected) ---
+    const setupUIBindings = () => {
+        const panels = [
+            { id: 'openQueue', target: 'queueOv' },
+            { id: 'closeQueue', target: 'queueOv', type: 'close' },
+            { id: 'openSettings', target: 'settingsOv' },
+            { id: 'closeSettings', target: 'settingsOv', type: 'close' },
+            { id: 'openStudioBtn', target: 'studioOv' },
+            { id: 'closeStudio', target: 'studioOv', type: 'close' },
+            { id: 'openAIFeatures', target: 'aiFeaturesOv' },
+            { id: 'closeAIFeatures', target: 'aiFeaturesOv', type: 'close' },
+            { id: 'closeArtistInfo', target: 'artistInfoOv', type: 'close' },
+            { id: 'closeSongSummary', target: 'songSummaryOv', type: 'close' },
+            { id: 'closeLyricsFinder', target: 'lyricsFinderOv', type: 'close' }
+        ];
+
+        panels.forEach(btn => {
+            const element = document.getElementById(btn.id);
+            if (element) {
+                element.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const targetEl = document.getElementById(btn.target);
+                    if (btn.type === 'close') {
+                        targetEl.classList.remove('active');
+                    } else {
+                        // Close alternative sheets if opening a sub-feature to clean viewport clutter
+                        if(btn.id === 'openAIFeatures') document.getElementById('settingsOv').classList.remove('active');
+                        targetEl.classList.add('active');
+                    }
+                });
+            }
+        });
+    };
+    setupUIBindings();
+
+    document.getElementById('setModeLocal').addEventListener('click', () => setPlayerMode('local'));
+    document.getElementById('setModeYouTube').addEventListener('click', () => setPlayerMode('youtube'));
+
+    // --- Gemini Processing Architecture ---
     document.getElementById('saveKeyBtn').onclick = () => { const keyVal = document.getElementById('geminiApiKeyInput').value.trim(); localStorage.setItem('mp33_gemini_key', keyVal); alert(keyVal ? 'API Key initialized successfully.' : 'API Key cleared.'); };
     async function fetchGeminiAI(userPrompt, systemInstruction) {
       const apiKey = localStorage.getItem('mp33_gemini_key'); if(!apiKey) throw new Error("Missing API Key in Settings.");
@@ -609,7 +632,7 @@
     document.getElementById('aiArtistInfoBtn').onclick = async () => {
       if (current === -1) return alert('Please play a track first.');
       document.getElementById('aiFeaturesOv').classList.remove('active'); document.getElementById('artistInfoOv').classList.add('active');
-      document.getElementById('artistInfoContent').innerHTML = '<div class="spinner"></div> Discovering...';
+      document.getElementById('artistInfoContent').innerHTML = '<div class="spinner"></div> Sourcing bio...';
       try { document.getElementById('artistInfoContent').textContent = await fetchGeminiAI(`Provide a concise single-paragraph biography for the artist "${playlist[current].artist}".`, "Act as an elegant music journalist. Keep it to one paragraph without markdown bold formatting."); } 
       catch(err) { document.getElementById('artistInfoContent').textContent = err.message; }
     };
@@ -617,7 +640,7 @@
     document.getElementById('aiSongSummaryBtn').onclick = async () => {
       if (current === -1) return alert('Please play a track first.');
       document.getElementById('aiFeaturesOv').classList.remove('active'); document.getElementById('songSummaryOv').classList.add('active');
-      document.getElementById('songSummaryContent').innerHTML = '<div class="spinner"></div> Analyzing...';
+      document.getElementById('songSummaryContent').innerHTML = '<div class="spinner"></div> Analyzing tracks...';
       try { document.getElementById('songSummaryContent').textContent = await fetchGeminiAI(`Analyze the track "${playlist[current].title}" by "${playlist[current].artist}". Describe its structural arrangement and mood in two clear sentences.`, "Act as a music analyst. Respond with exactly two sentences."); } 
       catch(err) { document.getElementById('songSummaryContent').textContent = err.message; }
     };
@@ -625,7 +648,7 @@
     document.getElementById('aiLyricsFinderBtn').onclick = async () => {
       if (current === -1) return alert('Please play a track first.');
       document.getElementById('aiFeaturesOv').classList.remove('active'); document.getElementById('lyricsFinderOv').classList.add('active');
-      document.getElementById('lyricsContent').innerHTML = '<div class="spinner"></div> Sourcing...';
+      document.getElementById('lyricsContent').innerHTML = '<div class="spinner"></div> Pulling lines...';
       try { document.getElementById('lyricsContent').textContent = await fetchGeminiAI(`Provide the lyrics for "${playlist[current].title}" by "${playlist[current].artist}".`, "Return pure lyrics structured in stanzas. No intros, commentary, or markdown blocks."); } 
       catch(err) { document.getElementById('lyricsContent').textContent = err.message; }
     };
