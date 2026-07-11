@@ -11,17 +11,18 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --theme-r: 20; --theme-g: 20; --theme-b: 20;
       --glass: rgba(255, 255, 255, 0.08);
       --glass-strong: rgba(255, 255, 255, 0.14);
       --on-glass: rgba(255, 255, 255, 0.95);
-      --shadow: rgba(0, 0, 0, 0.55);
+      --shadow: rgba(0, 0, 0, 0.6);
       --art-radius: 22px;
-      --tint-0: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.65);
-      --tint-1: rgba(0, 0, 0, 0.95);
+      /* Adjusted tint to let the blurred art shine through */
+      --tint-0: rgba(var(--theme-r), var(--theme-g), var(--theme-b), 0.35);
+      --tint-1: rgba(0, 0, 0, 0.75);
     }
     
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,8 +37,8 @@
     @keyframes cinematicScale { 0% { transform: scale(0.8); opacity: 0; letter-spacing: -0.1em; filter: blur(12px); } 100% { transform: scale(1); opacity: 1; letter-spacing: 0.05em; filter: blur(0); } }
     @keyframes fadeUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
     
-    /* Background Engine */
-    .bg { position: fixed; inset: 0; background-color: #111; background-position: center; background-size: cover; background-repeat: no-repeat; filter: blur(40px) brightness(0.5); transform: scale(1.15); transition: background-image 0.8s ease; z-index: -2; animation: bg-pan 45s infinite alternate; }
+    /* True Blurred Art Background Engine */
+    .bg { position: fixed; inset: 0; background-color: #111; background-position: center; background-size: cover; background-repeat: no-repeat; filter: blur(48px) brightness(0.65) saturate(1.5); transform: scale(1.15); transition: background-image 0.8s ease; z-index: -2; animation: bg-pan 45s infinite alternate; }
     @keyframes bg-pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
     .bg-tint { position: fixed; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(180deg, var(--tint-0) 0%, var(--tint-1) 100%); transition: opacity 0.1s ease-out; opacity: 0.8; }
     
@@ -52,11 +53,11 @@
     
     /* THEATER MODE (9:16 Cinematic) */
     body.theater-active .wrap { padding: 0; align-items: flex-end; }
-    body.theater-active .card { max-width: 100%; height: 100%; border-radius: 0; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; justify-content: flex-end; padding: 40px 24px 20px; border: none; perspective: none; gap: 20px; }
-    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.5; transform: none !important; } 
+    body.theater-active .card { max-width: 100%; height: 100%; border-radius: 0; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; justify-content: flex-end; padding: 40px 24px 30px; border: none; perspective: none; gap: 24px; }
+    body.theater-active .art-container { position: absolute; inset: 0; border-radius: 0; box-shadow: none !important; z-index: -1; opacity: 0.6; transform: none !important; } 
     body.theater-active .title { text-align: center; margin-bottom: 12px; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-    body.theater-active .title h1 { font-size: 28px; }
-    body.theater-active .title p { font-size: 16px; opacity: 0.8; }
+    body.theater-active .title h1 { font-size: 32px; font-weight: 900; }
+    body.theater-active .title p { font-size: 18px; opacity: 0.8; }
     body.theater-active .uploads, body.theater-active .yt-input-group, body.theater-active .bottom-actions { display: none !important; }
 
     /* Quality Badge */
@@ -69,8 +70,8 @@
 
     /* Typography */
     .title { width: 100%; text-align: left; padding: 4px 2px 0; transition: all 0.4s; }
-    .title h1 { font-size: 21px; line-height: 1.25; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.02em; }
-    .title p { font-size: 14px; opacity: 0.65; margin: 0; font-weight: 400; }
+    .title h1 { font-size: 22px; line-height: 1.25; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.02em; }
+    .title p { font-size: 15px; opacity: 0.65; margin: 0; font-weight: 400; }
 
     /* Inputs & Buttons */
     .uploads, .yt-input-group { display: flex; gap: 10px; width: 100%; transition: opacity 0.3s; }
@@ -80,9 +81,9 @@
     input[type=file] { display: none; }
     .hide { display: none !important; opacity: 0; pointer-events: none; }
 
-    /* --- Custom Animated Timeline --- */
-    .seek-container { width: 100%; }
-    .time-row { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.5; margin: 8px 0 0; font-variant-numeric: tabular-nums; }
+    /* Flicker-Free Animated Timeline */
+    .seek-container { width: 100%; margin-top: 4px; }
+    .time-row { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.6; margin: 8px 0 0; font-variant-numeric: tabular-nums; font-weight: 600; }
     
     .seek-wrap { position: relative; height: 24px; display: flex; align-items: center; cursor: pointer; }
     .seek-track { position: absolute; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; pointer-events: none; }
@@ -90,29 +91,29 @@
     .seek-thumb { position: absolute; left: 0%; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); transform: translateX(-50%); pointer-events: none; }
     .seek-input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; margin: 0; }
     
-    /* Dynamic Animation Classes */
-    .seek-transition .seek-fill, .seek-transition .seek-thumb { transition: width 0.1s linear, left 0.1s linear; }
-    .seek-resetting .seek-fill, .seek-resetting .seek-thumb { transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), left 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    /* Only transition when resetting to prevent flickering during playback */
+    .seek-resetting .seek-fill, .seek-resetting .seek-thumb { transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), left 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-    /* Controls Rows */
-    .transport { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+    /* Controls Rows (Bigger Media Controls) */
+    .transport { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+    .bottom-actions { width: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+    .glass-visor { display: flex; align-items: center; gap: 16px; background: var(--glass-strong); border-radius: 9999px; padding: 8px 16px; backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+    .btn { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; color: #000; cursor: pointer; user-select: none; transition: transform 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .btn-secondary { width: 52px; height: 52px; background: rgba(255,255,255,0.1); color: #fff; box-shadow: none; }
+    .btn:active { transform: scale(0.92); }
     
-    .bottom-actions { width: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
-
-    .glass-visor { display: flex; align-items: center; gap: 12px; background: var(--glass-strong); border-radius: 9999px; padding: 6px 12px; backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
-    .btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; color: #000; cursor: pointer; user-select: none; transition: transform 0.2s; }
-    .btn-secondary { width: 44px; height: 44px; background: rgba(255,255,255,0.08); color: #fff; }
-    .btn:active { transform: scale(0.94); }
-    .tri-right { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid currentColor; margin-left: 3px; }
-    .pause-bars { display: flex; gap: 5px; }
-    .pause-bars .bar { width: 5px; height: 18px; background: currentColor; border-radius: 1px; }
-    .skip-body { width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 14px solid currentColor; }
-    .skip-line { width: 3px; height: 18px; background: currentColor; border-radius: 1px; }
+    /* Scaled up Icons */
+    .tri-right { width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid currentColor; margin-left: 4px; }
+    .pause-bars { display: flex; gap: 6px; }
+    .pause-bars .bar { width: 6px; height: 22px; background: currentColor; border-radius: 2px; }
+    .skip-body { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid currentColor; }
+    .skip-line { width: 4px; height: 20px; background: currentColor; border-radius: 2px; }
     
     /* Clean SVG Transport Icons */
-    .icon-link { width: 42px; height: 42px; background: var(--glass-strong); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; color: #fff; user-select: none; }
+    .icon-link { width: 44px; height: 44px; background: var(--glass-strong); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; color: #fff; user-select: none; }
     .icon-link:active { transform: scale(0.92); background: rgba(255,255,255,0.25); }
-    .icon-link svg { width: 20px; height: 20px; stroke-width: 2px; }
+    .icon-link svg { width: 22px; height: 22px; stroke-width: 2px; }
 
     /* Bottom Overlays */
     .overlay { position: fixed; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0); pointer-events: none; z-index: 100; transition: background-color 0.4s; }
@@ -141,12 +142,12 @@
 
     /* Mobile Scale Adjustments */
     @media (max-width: 430px) {
-        .card { padding: 18px 14px 14px; gap: 12px; }
-        .icon-link { width: 38px; height: 38px; border-radius: 10px; }
+        .card { padding: 18px 14px 16px; gap: 14px; }
+        .icon-link { width: 40px; height: 40px; border-radius: 10px; }
         .icon-link svg { width: 18px; height: 18px; }
-        .glass-visor { padding: 4px 8px; gap: 8px; }
-        .btn { width: 44px; height: 44px; }
-        .btn-secondary { width: 38px; height: 38px; }
+        .glass-visor { padding: 6px 12px; gap: 12px; }
+        .btn { width: 56px; height: 56px; }
+        .btn-secondary { width: 48px; height: 48px; }
         .bottom-actions { gap: 12px; padding-top: 14px; margin-top: 10px; }
     }
   </style>
@@ -192,7 +193,7 @@
       </div>
 
       <div class="seek-container">
-        <!-- Upgraded Animated Timeline -->
+        <!-- Flicker-Free Animated Timeline -->
         <div id="seekWrap" class="seek-wrap">
           <div class="seek-track"></div>
           <div class="seek-fill" id="seekFill"></div>
@@ -406,7 +407,7 @@
         } else badge.className = "quality-badge hide";
     });
 
-    // --- Custom Animated Timeline ---
+    // --- Flicker-Free Animated Timeline ---
     const seekInput = document.getElementById('seek');
     const seekWrap = document.getElementById('seekWrap');
     const seekFill = document.getElementById('seekFill');
@@ -423,18 +424,13 @@
     function updateProgressUI(currentTime, duration) {
         seekInput.max = Math.floor(duration || 0);
         if (!isDraggingSeek) seekInput.value = Math.floor(currentTime || 0);
-        
         let percent = duration ? ((isDraggingSeek ? seekInput.value : currentTime) / duration) * 100 : 0;
         
         if (!isDraggingSeek) {
-            // Apply buttery cubic-bezier animation if returning to start
-            if (currentTime < 0.5 && duration > 0) {
-                seekWrap.className = 'seek-wrap seek-resetting';
-            } else {
-                seekWrap.className = 'seek-wrap seek-transition';
-            }
+            // Only transition when returning to 0 (song reset/skip) to prevent flicker
+            seekWrap.className = (currentTime < 0.5 && duration > 0) ? 'seek-wrap seek-resetting' : 'seek-wrap';
         } else {
-            seekWrap.className = 'seek-wrap'; // Instant follow when dragging
+            seekWrap.className = 'seek-wrap'; 
             percent = (seekInput.value / seekInput.max) * 100;
         }
         
@@ -446,37 +442,72 @@
     
     seekInput.addEventListener('input', () => {
         let percent = (seekInput.value / seekInput.max) * 100;
-        seekFill.style.width = `${percent}%`;
-        seekThumb.style.left = `${percent}%`;
+        seekFill.style.width = `${percent}%`; seekThumb.style.left = `${percent}%`;
         document.getElementById('cur').textContent = fmt(seekInput.value);
     });
 
-    // --- Cinematic Camera Export ---
+    // --- 9:16 Cinematic Theater Swipe Gestures ---
+    let touchStartX = 0;
+    const cardContainer = document.getElementById('mainCard');
+    cardContainer.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+    cardContainer.addEventListener('touchend', e => {
+        let touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) next(); 
+        if (touchEndX - touchStartX > 50) prev(); 
+    }, {passive: true});
+
+    // --- Spotify Recapped Style Story Export ---
     document.getElementById('exportStoryBtn').onclick = () => {
         if(current === -1 || currentMode !== 'local') return alert("Export is only available for local tracks currently playing.");
         const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1920; const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Vibrant Extracted Gradient Background
+        const r = getComputedStyle(document.documentElement).getPropertyValue('--theme-r').trim() || 40;
+        const g = getComputedStyle(document.documentElement).getPropertyValue('--theme-g').trim() || 40;
+        const b = getComputedStyle(document.documentElement).getPropertyValue('--theme-b').trim() || 40;
+        const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
+        grad.addColorStop(0, `rgb(${r}, ${g}, ${b})`); grad.addColorStop(1, '#050505');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         const img = new Image(); 
         if (!playlist[current].cover?.startsWith('data:')) img.crossOrigin = "Anonymous"; 
         
         img.onload = () => {
-            ctx.filter = 'blur(80px) brightness(0.6)'; ctx.drawImage(img, -200, -200, 1480, 2320); ctx.filter = 'none';
-            const gradient = ctx.createLinearGradient(0, 800, 0, 1920); gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(1, 'rgba(0,0,0,0.95)'); ctx.fillStyle = gradient; ctx.fillRect(0, 800, 1080, 1120);
+            // Light blurred texture overlay
+            ctx.globalCompositeOperation = 'overlay'; ctx.filter = 'blur(60px) opacity(0.5)';
+            ctx.drawImage(img, -200, -200, 1480, 2320);
+            ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
             
-            const artSize = 880; const marginX = 100; const marginY = 320;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 30;
+            // "ON REPEAT" Pill
+            ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(80, 120, 280, 60, 30); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = '700 24px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("ON REPEAT", 220, 158);
+            
+            // Giant Drop Shadow Cover Art
+            const artSize = 820; const marginX = 130; const marginY = 320;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'; ctx.shadowBlur = 80; ctx.shadowOffsetY = 40;
             ctx.save(); ctx.beginPath(); ctx.roundRect(marginX, marginY, artSize, artSize, 40); ctx.fill(); ctx.clip(); ctx.drawImage(img, marginX, marginY, artSize, artSize); ctx.restore();
             
-            ctx.shadowColor = 'transparent'; ctx.fillStyle = '#fff'; ctx.font = 'bold 76px Inter, sans-serif'; ctx.textAlign = 'center';
-            let titleStr = titleEl.textContent; if(titleStr.length > 22) titleStr = titleStr.substring(0, 20) + '...';
-            ctx.fillText(titleStr, 540, marginY + artSize + 160);
-            ctx.font = '50px Inter, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText(artistEl.textContent, 540, marginY + artSize + 240);
+            // Massive Typography (Recapped Vibe)
+            ctx.shadowColor = 'transparent'; ctx.textAlign = 'left';
             
-            ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(390, 1740, 300, 60, 30); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.font = '600 24px Inter, sans-serif'; ctx.fillText("mp33 AUDIO", 540, 1780);
+            // Title
+            ctx.fillStyle = '#fff'; ctx.font = '900 84px Inter, sans-serif'; 
+            let titleStr = titleEl.textContent; if(titleStr.length > 20) titleStr = titleStr.substring(0, 18) + '...';
+            ctx.fillText(titleStr, 130, marginY + artSize + 160);
+            
+            // Artist
+            ctx.font = '600 48px Inter, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText(artistEl.textContent, 130, marginY + artSize + 240);
+            
+            // Progress Bar Line
+            ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(130, marginY + artSize + 340, 820, 6);
+            ctx.fillStyle = '#fff'; ctx.fillRect(130, marginY + artSize + 340, 380, 6);
+            
+            // Branding Logo
+            ctx.font = '800 32px Inter, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText("mp33 AUDIO", 130, 1800);
 
-            try { const link = document.createElement('a'); link.download = `mp33_story_${titleEl.textContent.replace(/\s+/g, '_')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); } 
+            try { const link = document.createElement('a'); link.download = `mp33_recap_${titleEl.textContent.replace(/\s+/g, '_')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); } 
             catch(e) { alert("Cross-Origin block prevented export on this file format."); }
         };
         img.src = artImg.src;
@@ -532,12 +563,9 @@
     document.getElementById('folderInput').addEventListener('change', e=> addFiles(e.target.files));
     
     audio.ontimeupdate = () => { updateProgressUI(audio.currentTime, audio.duration); document.getElementById('playPause').innerHTML = !audio.paused ? '<div class="pause-bars"><div class="bar"></div><div class="bar"></div></div>' : '<div class="tri-right"></div>'; };
-    seekInput.oninput = e => { if (currentMode === 'local') audio.currentTime = e.target.value; else if (youtubePlayerInstance?.seekTo) youtubePlayerInstance.seekTo(e.target.value, true); };
     audio.addEventListener('ended', () => { if (current < playlist.length-1) next(); else pause(); });
-    document.getElementById('setRounded').onchange = (e)=> document.documentElement.style.setProperty('--art-radius', e.target.checked ? '22px' : '0px');
 
-    document.getElementById('setModeLocal').addEventListener('click', () => setPlayerMode('local'));
-    document.getElementById('setModeYouTube').addEventListener('click', () => setPlayerMode('youtube'));
+    document.getElementById('setRounded').onchange = (e)=> document.documentElement.style.setProperty('--art-radius', e.target.checked ? '22px' : '0px');
 
     function setPlayerMode(mode) {
         if (currentMode === mode) return;
